@@ -9,13 +9,39 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(SOURCES
+    UDPController/receiver.cpp
+)
+
+set(HEADERS
+    UDPController/receiver.h
+)
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Network)
+
+
+
+
 
 add_executable(ArtNetNode
   main.cpp
+  UDPController/receiver.cpp
+  UDPController/receiver.h
+  UDPController/CMakeLists.txt
+
+
 )
-target_link_libraries(ArtNetNode Qt${QT_VERSION_MAJOR}::Core)
+
+add_subdirectory(UDPController)
+
+target_link_libraries(ArtNetNode PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt6::Network
+    receiver
+)
+
 
 include(GNUInstallDirs)
 install(TARGETS ArtNetNode
