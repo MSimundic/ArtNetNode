@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include "receiver.h"
+#include "sender.h"
 #include <iostream>
 using namespace std;
 int main(int argc, char *argv[])
