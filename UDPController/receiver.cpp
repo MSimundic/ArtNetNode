@@ -8,7 +8,7 @@ Receiver::Receiver(QWidget *parent)
     , groupAddressv4(QStringLiteral("192.168.0.1"))
 
 {
-    udpSocketv4.bind(QHostAddress::AnyIPv4, 45454, QUdpSocket::ShareAddress);
+    udpSocketv4.bind(QHostAddress::AnyIPv4, 6454, QUdpSocket::ShareAddress);
     udpSocketv4.joinMulticastGroup(groupAddressv4);
 
     //connect()
@@ -17,12 +17,10 @@ Receiver::Receiver(QWidget *parent)
 
 void Receiver::processPendingDatagrams()
 {
-    QByteArray datagram;
-
     // using QUdpSocket::receiveDatagram (API since Qt 5.8)
     while (udpSocketv4.hasPendingDatagrams()) {
         QNetworkDatagram dgram = udpSocketv4.receiveDatagram();
 
-        cout << dgram.data().constData() << endl;
+        cout << dgram.data().constData() << dgram.senderPort() << endl;
     }
 }
