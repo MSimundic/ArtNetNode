@@ -1,26 +1,26 @@
 #include "receiver.h"
+#include <QDebug>
 #include <QtNetwork>
-#include <QtWidgets>
-#include <iostream>
-using namespace std;
-Receiver::Receiver(QWidget *parent)
-    : QDialog(parent)
-    , groupAddressv4(QStringLiteral("192.168.0.1"))
+Receiver::Receiver()
+    : QDialog()
 
 {
     udpSocketv4.bind(QHostAddress::AnyIPv4, 6454, QUdpSocket::ShareAddress);
-    udpSocketv4.joinMulticastGroup(groupAddressv4);
+    //udpSocketv4.joinMulticastGroup(groupAddressv4);
 
     //connect()
+    qInfo("try connect");
     connect(&udpSocketv4, &QUdpSocket::readyRead, this, &Receiver::processPendingDatagrams);
+    qInfo("connected");
 }
 
 void Receiver::processPendingDatagrams()
 {
+    qInfo("process");
     // using QUdpSocket::receiveDatagram (API since Qt 5.8)
     while (udpSocketv4.hasPendingDatagrams()) {
         QNetworkDatagram dgram = udpSocketv4.receiveDatagram();
 
-        cout << dgram.data().constData() << dgram.senderPort() << endl;
+        qInfo("%s", dgram.data().constData());
     }
 }
