@@ -1,11 +1,11 @@
-#include <QApplication>
+#include <QCoreApplication>
 #include "receiver.h"
 #include "sender.h"
 #include <iostream>
 using namespace std;
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
     cout << "test" << endl;
     Receiver receiver;

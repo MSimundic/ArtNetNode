@@ -1,9 +1,8 @@
 #include "receiver.h"
 #include <QDebug>
 #include <QtNetwork>
-Receiver::Receiver()
-    : QDialog()
 
+Receiver::Receiver()
 {
     udpSocketv4.bind(QHostAddress::AnyIPv4, 6454, QUdpSocket::ShareAddress);
     //udpSocketv4.joinMulticastGroup(groupAddressv4);

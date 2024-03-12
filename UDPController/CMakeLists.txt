@@ -13,11 +13,9 @@ target_include_directories(sender PUBLIC .)
 target_link_libraries(receiver PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Widgets
 )
 
 target_link_libraries(sender PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Widgets
 )
