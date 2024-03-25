@@ -28,6 +28,7 @@ target_link_libraries(ArtNetNode PRIVATE
     Qt${QT_VERSION_MAJOR}::Network
     receiver
     sender
+    decoder
 )
 
 

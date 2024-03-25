@@ -16,8 +16,8 @@ void Receiver::processPendingDatagrams()
     qInfo("process");
     // using QUdpSocket::receiveDatagram (API since Qt 5.8)
     while (udpSocketv4.hasPendingDatagrams()) {
-        QNetworkDatagram dgram = udpSocketv4.receiveDatagram();
-
-        qInfo("%s", dgram.data().constData());
+        QNetworkDatagram datagram = udpSocketv4.receiveDatagram();
+        qInfo("received");
+        emit readDone(datagram);
     }
 }

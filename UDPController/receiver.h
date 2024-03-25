@@ -17,6 +17,9 @@ private slots:
 
 private:
     QUdpSocket udpSocketv4;
+
+signals:
+    void readDone(QNetworkDatagram datagram);
 };
 
 #endif // RECEIVER_H
