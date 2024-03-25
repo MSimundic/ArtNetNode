@@ -1,6 +1,4 @@
 #include "receiver.h"
-#include <QDebug>
-#include <QtNetwork>
 
 Receiver::Receiver()
 {

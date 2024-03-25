@@ -9,5 +9,12 @@ int main(int argc, char *argv[])
 
     cout << "test" << endl;
     Receiver receiver;
+
+    Sender sender;
+
+    QByteArray datagram = "1234";
+    QString ipAdress = "10.10.1.140";
+    sender.sendDatagram(datagram, ipAdress);
+
     return a.exec();
 }

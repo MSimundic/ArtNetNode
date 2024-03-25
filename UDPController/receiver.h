@@ -3,6 +3,8 @@
 
 #include <QHostAddress>
 #include <QUdpSocket>
+#include <QDebug>
+#include <QtNetwork>
 
 class Receiver : public QObject
 {
