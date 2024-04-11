@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&receiver, &Receiver::readDone, &decoder, &Decoder::decodeDatagram);
     QByteArray datagram = "1234";
-    QString ipAddress = "10.10.1.140";
+    QString ipAddress = "192.168.0.24";
     sender.sendDatagram(datagram, ipAddress);
 
     return a.exec();
