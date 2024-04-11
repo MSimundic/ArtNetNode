@@ -1,9 +1,10 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-#include "qtypes.h"
+//#include "qtypes.h"
 
-enum class OpCode : quint16 {
+#include <cstdint>
+enum class OpCode : uint16_t {
     // Device Discovery
     Poll = 0x2000,
     PollReply = 0x2100,
