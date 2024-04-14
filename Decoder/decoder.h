@@ -12,9 +12,17 @@ class Decoder : public QObject
 public:
     Decoder();
 
+private:
+    OpCode getOpCode(QNetworkDatagram datagram);
+
 public slots:
     void decodeDatagram(QNetworkDatagram datagram);
-    OpCode getOpCode(QNetworkDatagram datagram);
+
+signals:
+    void artPoll(QNetworkDatagram datagram);
+    void artPollReply(QNetworkDatagram datagram);
+    void artDMX(QNetworkDatagram datagram);
+    void artAddress(QNetworkDatagram datagram);
 };
 
 #endif // DECODER_H

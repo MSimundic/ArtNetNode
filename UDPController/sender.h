@@ -12,12 +12,12 @@ class Sender : public QObject
 
 public:
     explicit Sender();
-    void sendDatagram(QByteArray datagram, QString ipAddress);
+
+public slots:
+    void sendDatagram(QNetworkDatagram datagram);
 
 private:
     QUdpSocket udpSocketv4;
-    QHostAddress consoleAddress4;
-
 };
 
 

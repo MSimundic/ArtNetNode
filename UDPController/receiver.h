@@ -10,7 +10,7 @@ class Receiver : public QObject
 {
     Q_OBJECT
 public:
-    Receiver();
+    explicit Receiver();
 
 private slots:
     void processPendingDatagrams();

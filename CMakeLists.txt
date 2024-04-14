@@ -17,7 +17,6 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 
 add_executable(ArtNetNode
   main.cpp
-  ArtNetController/artnetcontroller.h ArtNetController/artnetcontroller.cpp
 )
 
 add_subdirectory(UDPController)
@@ -32,6 +31,7 @@ target_link_libraries(ArtNetNode PRIVATE
     sender
     decoder
     definitions
+    artnetcontroller
 )
 
 
