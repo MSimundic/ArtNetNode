@@ -16,7 +16,7 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     ArtPollReplyPacket packet;
     PacketConfig config = ArtNetController::getPacketConfig();
 
-    strcpy_s(reinterpret_cast<char *>(packet.id), 8, ARTNET_ID);
+    strcpy(reinterpret_cast<char *>(packet.id), ARTNET_ID);
     // qInfo() << "Test: " << reinterpret_cast<char *>(packet.id);
 
     packet.op_code_l = ((uint16_t) OpCode::PollReply >> 0) & 0x00FF;
@@ -46,20 +46,13 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     packet.esta_man_l = (config.esta_man >> 8) & 0xFF;
     packet.esta_man_h = (config.esta_man >> 8) & 0xFF;
 
-    memcpy_s(packet.short_name,
-             sizeof(packet.short_name),
-             config.short_name.toStdString().c_str(),
-             config.short_name.length());
-    memcpy_s(packet.long_name,
-             sizeof(packet.long_name),
-             config.long_name.toStdString().c_str(),
-             config.long_name.length());
-    memcpy_s(packet.node_report,
-             sizeof(packet.node_report),
-             config.node_report.toStdString().c_str(),
-             config.node_report.length());
+    memcpy(packet.short_name, config.short_name.toStdString().c_str(), config.short_name.length());
+    memcpy(packet.long_name, config.long_name.toStdString().c_str(), config.long_name.length());
+    memcpy(packet.node_report,
+           config.node_report.toStdString().c_str(),
+           config.node_report.length());
 
-    packet.num_ports_h = 0; // Reserved
+    packet.num_ports_h = 0;
     packet.num_ports_l = 1;
 
     memset(packet.port_types, 0, 4);
