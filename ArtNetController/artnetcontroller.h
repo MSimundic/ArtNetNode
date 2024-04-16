@@ -3,8 +3,10 @@
 
 #include <QDebug>
 #include <QObject>
-#include <QtNetwork>
 #include <QSerialPort>
+#include <QTimer>
+#include <QtNetwork>
+
 #include "ArtPollReplyPacket.h"
 #include "definitions.h"
 #include "packetConfig.h"
@@ -13,6 +15,7 @@ class ArtNetController : public QObject
     Q_OBJECT
 public:
     ArtNetController();
+    ~ArtNetController();
 
 public slots:
     void artPoll(QNetworkDatagram datagram);
@@ -24,6 +27,8 @@ private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
     PacketConfig getPacketConfig();
     void configSerialPort(QSerialPort *serialPort);
+
+    QSerialPort *serialPort;
 
 signals:
     void sendDatagram(QNetworkDatagram datagram);
