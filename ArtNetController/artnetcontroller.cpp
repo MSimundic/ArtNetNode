@@ -112,18 +112,12 @@ void ArtNetController::artDMX(QNetworkDatagram datagram) {
     QByteArray data = datagram.data();
     QSerialPort* serialPort = new QSerialPort;
     configSerialPort(serialPort);
-    // QSerialPort serialPort;
-    // serialPort.setPortName("/dev/tty/ttyS1");
-    // serialPort.setBaudRate(QSerialPort::Baud115200);
-    // serialPort.setDataBits(QSerialPort::Data8);
-    // serialPort.setParity(QSerialPort::NoParity);
-    // serialPort.setStopBits(QSerialPort::OneStop);
-    // serialPort.setFlowControl(QSerialPort::NoFlowControl);
-    serialPort->open(QIODevice::ReadWrite);
+
+    if (!serialPort->open(QIODevice::ReadWrite))
+        qCritical() << "Error: serial port failed to open. " << serialPort->error();
     // qInfo() << "Data length: " << data.length();
-    for (int i = 18; i < data.length();i++){
-        serialPort->write(data);
-    }
+
+    serialPort->write(data);
     serialPort->close();
 }
 
