@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&receiver, &Receiver::readDone, &decoder, &Decoder::decodeDatagram);
     QObject::connect(&decoder, &Decoder::artPoll, &artNetController, &ArtNetController::artPoll);
+    QObject::connect(&decoder, &Decoder::artDMX, &artNetController, &ArtNetController::artDMX);
     QObject::connect(&artNetController,
                      &ArtNetController::sendDatagram,
                      &sender,

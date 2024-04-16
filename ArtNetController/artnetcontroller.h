@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QtNetwork>
-
+#include <QSerialPort>
 #include "ArtPollReplyPacket.h"
 #include "definitions.h"
 #include "packetConfig.h"
@@ -23,6 +23,7 @@ public slots:
 private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
     PacketConfig getPacketConfig();
+    void configSerialPort(QSerialPort *serialPort);
 
 signals:
     void sendDatagram(QNetworkDatagram datagram);
