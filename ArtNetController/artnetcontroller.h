@@ -13,6 +13,7 @@ class ArtNetController : public QObject
     Q_OBJECT
 public:
     ArtNetController();
+    ~ArtNetController();
 
 public slots:
     void artPoll(QNetworkDatagram datagram);
@@ -24,6 +25,8 @@ private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
     PacketConfig getPacketConfig();
     void configSerialPort(QSerialPort *serialPort);
+
+    QSerialPort *serialPort;
 
 signals:
     void sendDatagram(QNetworkDatagram datagram);

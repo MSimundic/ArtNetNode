@@ -2,7 +2,17 @@
 
 ArtNetController::ArtNetController()
 {
-    
+    serialPort = new QSerialPort;
+    configSerialPort(serialPort);
+    if (!serialPort->open(QIODevice::WriteOnly))
+        qCritical() << "Error: serial port failed to open. " << serialPort->error();
+
+    // qInfo() << "Data length: " << data.length();
+}
+ArtNetController::~ArtNetController()
+{
+    serialPort->close();
+    delete serialPort;
 }
 PacketConfig ArtNetController::getPacketConfig()
 {
@@ -13,11 +23,11 @@ PacketConfig ArtNetController::getPacketConfig()
 
 void ArtNetController::configSerialPort(QSerialPort *serialPort){
     //QSerialPort serialPort;
-    serialPort->setPortName("/dev/tty/ttyS1");
-    serialPort->setBaudRate(QSerialPort::Baud115200);
+    serialPort->setPortName("/dev/ttyS1");
+    serialPort->setBaudRate(115200);
     serialPort->setDataBits(QSerialPort::Data8);
     serialPort->setParity(QSerialPort::NoParity);
-    serialPort->setStopBits(QSerialPort::OneStop);
+    serialPort->setStopBits(QSerialPort::TwoStop);
     serialPort->setFlowControl(QSerialPort::NoFlowControl);
 }
 
@@ -110,15 +120,12 @@ void ArtNetController::artPollReply(QNetworkDatagram datagram) {}
 
 void ArtNetController::artDMX(QNetworkDatagram datagram) {
     QByteArray data = datagram.data();
-    QSerialPort* serialPort = new QSerialPort;
-    configSerialPort(serialPort);
 
-    if (!serialPort->open(QIODevice::ReadWrite))
-        qCritical() << "Error: serial port failed to open. " << serialPort->error();
-    // qInfo() << "Data length: " << data.length();
-
-    serialPort->write(data);
-    serialPort->close();
+    int count = serialPort->write(QString("test").toLatin1());
+    
+    qInfo() << "Number of bytes sent" << count;
+    serialPort->waitForBytesWritten(-1);
+   
 }
 
 void ArtNetController::artAddress(QNetworkDatagram datagram) {}
