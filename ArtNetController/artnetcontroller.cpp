@@ -21,15 +21,11 @@ PacketConfig ArtNetController::getPacketConfig()
     return config;
 }
 
-void ArtNetController::configSerialPort(QSerialPort *serialPort){
+void ArtNetController::configSerialPort(QSerialPort *serialPort)
+{
     //QSerialPort serialPort;
-<<<<<<< HEAD
-    serialPort->setPortName("COM10");
+    serialPort->setPortName("/dev/ttyUSB0");
     serialPort->setBaudRate(250000);
-=======
-    serialPort->setPortName("/dev/ttyS1");
-    serialPort->setBaudRate(115200);
->>>>>>> 1fddf823aeb5617a5ec571ea6f9767c15de8fd25
     serialPort->setDataBits(QSerialPort::Data8);
     serialPort->setParity(QSerialPort::NoParity);
     serialPort->setStopBits(QSerialPort::TwoStop);
@@ -123,10 +119,10 @@ void ArtNetController::artPoll(QNetworkDatagram datagram)
 
 void ArtNetController::artPollReply(QNetworkDatagram datagram) {}
 
-void ArtNetController::artDMX(QNetworkDatagram datagram) {
+void ArtNetController::artDMX(QNetworkDatagram datagram)
+{
     QByteArray data = datagram.data();
 
-<<<<<<< HEAD
     //int count = serialPort->write(QString("test").toLatin1());
     //add MAB
     data = data.mid(18, 512);
@@ -138,13 +134,6 @@ void ArtNetController::artDMX(QNetworkDatagram datagram) {
 
     qInfo() << "Number of bytes sent" << count;
     serialPort->waitForBytesWritten(-1);
-=======
-    int count = serialPort->write(QString("test").toLatin1());
-    
-    qInfo() << "Number of bytes sent" << count;
-    serialPort->waitForBytesWritten(-1);
-   
->>>>>>> 1fddf823aeb5617a5ec571ea6f9767c15de8fd25
 }
 
 void ArtNetController::artAddress(QNetworkDatagram datagram) {}
