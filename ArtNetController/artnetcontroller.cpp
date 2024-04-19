@@ -6,17 +6,18 @@ ArtNetController::ArtNetController()
     configSerialPort(serialPort);
     if (!serialPort->open(QIODevice::WriteOnly))
         qCritical() << "Error: serial port failed to open. " << serialPort->error();
-
-    // qInfo() << "Data length: " << data.length();
+    data.fill(0x00, 512);
+    //() << "Data length: " << data.length();
+    config = getConfig();
 }
 ArtNetController::~ArtNetController()
 {
     serialPort->close();
     delete serialPort;
 }
-PacketConfig ArtNetController::getPacketConfig()
+Config ArtNetController::getConfig()
 {
-    PacketConfig config;
+    Config config;
 
     return config;
 }
@@ -24,8 +25,8 @@ PacketConfig ArtNetController::getPacketConfig()
 void ArtNetController::configSerialPort(QSerialPort *serialPort)
 {
     //QSerialPort serialPort;
-    serialPort->setPortName("/dev/ttyUSB0");
-    serialPort->setBaudRate(250000);
+    serialPort->setPortName("COM10");
+    serialPort->setBaudRate(256000);
     serialPort->setDataBits(QSerialPort::Data8);
     serialPort->setParity(QSerialPort::NoParity);
     serialPort->setStopBits(QSerialPort::TwoStop);
@@ -35,7 +36,6 @@ void ArtNetController::configSerialPort(QSerialPort *serialPort)
 ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram datagram)
 {
     ArtPollReplyPacket packet;
-    PacketConfig config = ArtNetController::getPacketConfig();
 
     strcpy(reinterpret_cast<char *>(packet.id), ARTNET_ID);
     // qInfo() << "Test: " << reinterpret_cast<char *>(packet.id);
@@ -82,9 +82,9 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     memset(packet.sw_in, 0, 4);
     memset(packet.sw_out, 0, 4);
 
-    packet.net_sw = (config.netSubNetUni >> 8) & 0x7F;
-    packet.sub_sw = (config.netSubNetUni >> 4) & 0x0F;
-    packet.sw_in[0] = (config.netSubNetUni >> 0) & 0x0F;
+    packet.net_sw = (config.net) & 0x7F;
+    packet.sub_sw = (config.subNetUni >> 4) & 0x0F;
+    packet.sw_in[0] = (config.subNetUni >> 0) & 0x0F;
     packet.sw_out[0] = 0;
     packet.port_types[0] = 0xC0;
     packet.good_input[0] = 0x80;
@@ -107,6 +107,20 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     return packet;
 }
 
+void ArtNetController::outputDmx()
+{
+    serialPort->setBreakEnabled(true);
+    //QThread::msleep(1);
+    serialPort->setBreakEnabled(false);
+    QByteArray dataToSend = data;
+    dataToSend.prepend(QByteArray::fromHex("00"));
+    int count = serialPort->write(dataToSend);
+
+    qInfo() << "Number of bytes sent" << count;
+
+    serialPort->waitForBytesWritten(-1);
+}
+
 void ArtNetController::artPoll(QNetworkDatagram datagram)
 {
     //qInfo() << "artpoll called in controller";
@@ -121,19 +135,13 @@ void ArtNetController::artPollReply(QNetworkDatagram datagram) {}
 
 void ArtNetController::artDMX(QNetworkDatagram datagram)
 {
-    QByteArray data = datagram.data();
-
-    //int count = serialPort->write(QString("test").toLatin1());
-    //add MAB
-    data = data.mid(18, 512);
-    data.prepend(QByteArray::fromHex("00"));
-    serialPort->setBreakEnabled(true);
-    QThread::msleep(1);
-    serialPort->setBreakEnabled(false);
-    int count = serialPort->write(data);
-
-    qInfo() << "Number of bytes sent" << count;
-    serialPort->waitForBytesWritten(-1);
+    qInfo() << "Config uni: " << config.net << "Config subnetUni " << config.subNetUni;
+    qInfo() << "Packet uni: " << datagram.data().at(15) << "Packet subnetUni "
+            << datagram.data().at(14);
+    if (datagram.data().at(15) == config.net && datagram.data().at(14) == config.subNetUni) {
+        data = datagram.data().mid(18, 512);
+        outputDmx();
+    }
 }
 
 void ArtNetController::artAddress(QNetworkDatagram datagram) {}

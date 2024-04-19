@@ -8,8 +8,8 @@
 #include <QtNetwork>
 
 #include "ArtPollReplyPacket.h"
+#include "Config.h"
 #include "definitions.h"
-#include "packetConfig.h"
 class ArtNetController : public QObject
 {
     Q_OBJECT
@@ -22,13 +22,16 @@ public slots:
     void artPollReply(QNetworkDatagram datagram);
     void artDMX(QNetworkDatagram datagram);
     void artAddress(QNetworkDatagram datagram);
+    void outputDmx();
 
 private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
-    PacketConfig getPacketConfig();
+    Config getConfig();
     void configSerialPort(QSerialPort *serialPort);
 
     QSerialPort *serialPort;
+    QByteArray data;
+    Config config;
 
 signals:
     void sendDatagram(QNetworkDatagram datagram);

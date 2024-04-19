@@ -1,4 +1,6 @@
 #include <QCoreApplication>
+#include <QThread>
+#include <QTimer>
 #include "artnetcontroller.h"
 #include "decoder.h"
 #include "receiver.h"
@@ -7,6 +9,11 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    QTimer *timer = new QTimer();
+
+    // Receiver *receiver = new Receiver();
+    // QThread *receiverThread = new QThread();
+    // receiver->moveToThread(receiverThread);
     Receiver receiver;
     Decoder decoder;
     Sender sender;
@@ -20,9 +27,8 @@ int main(int argc, char *argv[])
                      &sender,
                      &Sender::sendDatagram);
 
-    //QByteArray datagram = "1234";
-    //QString ipAddress = "192.168.0.24";
-    //sender.sendDatagram(datagram, ipAddress);
+    QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx);
+    timer->start(250);
 
     return a.exec();
 }
