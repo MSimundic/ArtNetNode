@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Network SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Network SerialPort HttpServer)
 
 
 
@@ -24,17 +24,20 @@ add_subdirectory(ArtNetController)
 add_subdirectory(Decoder)
 add_subdirectory(Definitions)
 add_subdirectory(JsonSerializer)
+add_subdirectory(HttpServer)
 
 target_link_libraries(ArtNetNode PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::SerialPort
+    Qt${QT_VERSION_MAJOR}::HttpServer
     receiver
     sender
     decoder
     definitions
     artnetcontroller
     jsonserializer
+    httpServer
 )
 
 

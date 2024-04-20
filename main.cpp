@@ -5,6 +5,7 @@
 #include "decoder.h"
 #include "receiver.h"
 #include "sender.h"
+#include "httpserver.h"
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -18,16 +19,17 @@ int main(int argc, char *argv[])
     Decoder decoder;
     Sender sender;
     ArtNetController artNetController;
+    HttpServer httpServer;
 
-    QObject::connect(&receiver, &Receiver::readDone, &decoder, &Decoder::decodeDatagram);
-    QObject::connect(&decoder, &Decoder::artPoll, &artNetController, &ArtNetController::artPoll);
-    QObject::connect(&decoder, &Decoder::artDMX, &artNetController, &ArtNetController::artDMX);
-    QObject::connect(&artNetController,
-                     &ArtNetController::sendDatagram,
-                     &sender,
-                     &Sender::sendDatagram);
+    //QObject::connect(&receiver, &Receiver::readDone, &decoder, &Decoder::decodeDatagram);
+    //QObject::connect(&decoder, &Decoder::artPoll, &artNetController, &ArtNetController::artPoll);
+    //QObject::connect(&decoder, &Decoder::artDMX, &artNetController, &ArtNetController::artDMX);
+    //QObject::connect(&artNetController,
+    //                 &ArtNetController::sendDatagram,
+    //                 &sender,
+    //                 &Sender::sendDatagram);
 
-    QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx);
+    //QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx);
     timer->start(250);
 
     return a.exec();
