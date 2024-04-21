@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        body {
+            display: grid;
+            width: 20%;
+        }
+        
+        h1 {
+            font-size: 16pt;
+        }
+        
+        h2 {
+            font-size: 14pt;
+            padding-top: 5%;
+        }
+        
+        form {
+            display: grid;
+        }
+        
+        label {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <h1>ArtNet Node</h1>
+
+
+    <form id="inputForm">
+        <h2>Device settings</h2>
+        <label for="shortName">Short name</label><br>
+        <input type="text" id="shortName" name="shortName"><br>
+
+        <label for="ipAddress">IP address</label><br>
+        <input type="text" id="ipAddress" name="ipAddress"><br>
+
+        <label for="subnetMask ">Subnet mask</label><br>
+        <input type="text" id="lname" name="lname"><br>
+
+        <h2>Port settings</h2>
+        <label for="net">Net</label><br>
+        <input type="text" id="net" name="net"><br>
+
+        <label for="primary">Primary</label><br>
+        <input type="text" id="primary" name="primary"><br>
+
+        <label for="device">USB device /dev/ttyUSB</label><br>
+        <input type="number" id="device" name="device"><br>
+
+        <input type="submit" name="submit" value="Submit"><br>
+    </form>
+    <script>
+        const formToJSON = (elements) => [].reduce.call(
+            elements,
+            (data, element) => {
+                data[element.name] = element.value;
+                return data;
+            }, {}
+        );
+
+        const postRequest = (data) => {
+            var xhr = new XMLHttpRequest();
+            var url = "data.json";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onload = () => {
+                if (xhr.readyState === 4 && xhr.status === 201) {
+                    var json = JSON.parse(xhr.responseText);
+                    console.log(json.email + ", " + json.password);
+                }
+            };
+
+            xhr.send(data);
+        }
+
+
+        const handleFormSubmit = (event) => {
+            // Stop the form from submitting since we’re handling that with AJAX.
+            event.preventDefault();
+
+            // Call our function to get the form data.
+            const data = formToJSON(form.elements);
+            postRequest(JSON.stringify(data, null, " "));
+            //console.log(JSON.stringify(data, null, " "));
+            // ...this is where we’d actually do something with the form data...
+        };
+
+        const form = document.getElementById("inputForm");
+        form.addEventListener("submit", handleFormSubmit);
+    </script>
+</body>
+
+</html>

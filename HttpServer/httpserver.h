@@ -4,12 +4,17 @@
 #include <QHttpServer>
 #include <QHttpServerResponse>
 
-class HttpServer
+class HttpServer : public QObject
 {
+    Q_OBJECT
 public:
     HttpServer();
 private:
     QHttpServer httpServer;
+    QByteArray data;
+
+signals:
+    void fileReceived(QByteArray data);
 };
 
 #endif // HTTPSERVER_H

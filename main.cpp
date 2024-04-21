@@ -6,6 +6,9 @@
 #include "receiver.h"
 #include "sender.h"
 #include "httpserver.h"
+#include "jsonserializer.h"
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -20,7 +23,9 @@ int main(int argc, char *argv[])
     Sender sender;
     ArtNetController artNetController;
     HttpServer httpServer;
+    JsonSerializer jsonSerializer;
 
+    QObject::connect(&httpServer, &HttpServer::fileReceived, &jsonSerializer, &JsonSerializer::fileReceived);
     //QObject::connect(&receiver, &Receiver::readDone, &decoder, &Decoder::decodeDatagram);
     //QObject::connect(&decoder, &Decoder::artPoll, &artNetController, &ArtNetController::artPoll);
     //QObject::connect(&decoder, &Decoder::artDMX, &artNetController, &ArtNetController::artDMX);
