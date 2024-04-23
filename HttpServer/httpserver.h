@@ -17,7 +17,7 @@ signals:
     void fileReceived(QByteArray data);
 
 public slots:
-    //void fileRead(QByteArray data);
+    void listenNewIp();
 };
 
 #endif // HTTPSERVER_H

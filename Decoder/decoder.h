@@ -23,6 +23,7 @@ signals:
     void artPollReply(QNetworkDatagram datagram);
     void artDMX(QNetworkDatagram datagram);
     void artAddress(QNetworkDatagram datagram);
+    void artIpProg(QNetworkDatagram datagram);
 };
 
 #endif // DECODER_H

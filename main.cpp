@@ -24,16 +24,22 @@ int main(int argc, char *argv[])
 
 
     QObject::connect(&artNetController, &ArtNetController::newIpSet, &sender, &Sender::bindNewIp);
-        QObject::connect(&artNetController, &ArtNetController::newIpSet, &receiver, &Receiver::bindNewIp);
+    QObject::connect(&artNetController, &ArtNetController::newIpSet, &receiver, &Receiver::bindNewIp);
+    //QObject::connect(&artNetController, &ArtNetController::newIpSet, &httpServer, &HttpServer::listenNewIp);
     QObject::connect(&jsonSerializer, &JsonSerializer::configChanged, &artNetController, &ArtNetController::getConfig);
     QObject::connect(&httpServer, &HttpServer::fileReceived, &jsonSerializer, &JsonSerializer::writeToFile);
     QObject::connect(&receiver, &Receiver::readDone, &decoder, &Decoder::decodeDatagram);
-    QObject::connect(&decoder, &Decoder::artPoll, &artNetController, &ArtNetController::artPoll);
-    QObject::connect(&decoder, &Decoder::artDMX, &artNetController, &ArtNetController::artDMX);
     QObject::connect(&artNetController,
                      &ArtNetController::sendDatagram,
                      &sender,
                      &Sender::sendDatagram);
+
+    QObject::connect(&decoder, &Decoder::artPoll, &artNetController, &ArtNetController::artPoll);
+    QObject::connect(&decoder, &Decoder::artDMX, &artNetController, &ArtNetController::artDMX);
+    QObject::connect(&decoder, &Decoder::artIpProg, &artNetController, &ArtNetController::artIpProg);
+    QObject::connect(&decoder, &Decoder::artAddress, &artNetController, &ArtNetController::artAddress);
+
+
 
     //QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx);
     //timer->start(250);

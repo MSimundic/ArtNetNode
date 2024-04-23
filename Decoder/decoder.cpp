@@ -24,6 +24,10 @@ void Decoder::decodeDatagram(QNetworkDatagram datagram)
         qInfo() << "ArtAddress";
         emit artAddress(datagram);
         break;
+    case OpCode::IpProg:
+        qInfo() << "IpProg";
+        emit artIpProg(datagram);
+        break;
     default:
 
         break;

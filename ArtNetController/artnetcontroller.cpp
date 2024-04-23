@@ -131,6 +131,30 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     return packet;
 }
 
+ArtIpProgReplyPacket ArtNetController::constructIpProgReply(){
+    ArtIpProgReplyPacket packet;
+
+    strcpy(reinterpret_cast<char *>(packet.id), ARTNET_ID);
+    // qInfo() << "Test: " << reinterpret_cast<char *>(packet.id);
+
+    packet.opCodeLo = ((uint16_t) OpCode::IpProgReply >> 0) & 0x00FF;
+    packet.opCodeHi = ((uint16_t) OpCode::IpProgReply >> 8) & 0x00FF;
+
+    QStringList ipOctets = config.ip.split(".");
+    packet.progIpHi = ipOctets.at(0).toUShort();
+    packet.progIp2 = ipOctets.at(1).toUShort();
+    packet.progIp1 = ipOctets.at(2).toUShort();
+    packet.progIpLo = ipOctets.at(3).toUShort();
+
+    QStringList subnetMaskOctets = config.subnetMask.split(".");
+    packet.progSmHi = subnetMaskOctets.at(0).toUShort();
+    packet.progSm2 = subnetMaskOctets.at(1).toUShort();
+    packet.progSm1 = subnetMaskOctets.at(2).toUShort();
+    packet.progSmLo = subnetMaskOctets.at(3).toUShort();
+
+    return packet;
+}
+
 void ArtNetController::outputDmx()
 {
     serialPort->setBreakEnabled(true);
@@ -168,4 +192,56 @@ void ArtNetController::artDMX(QNetworkDatagram datagram)
     }
 }
 
-void ArtNetController::artAddress(QNetworkDatagram datagram) {}
+void ArtNetController::artAddress(QNetworkDatagram datagram) {
+
+}
+
+void ArtNetController::artIpProg(QNetworkDatagram datagram) {
+    uint8_t command = datagram.data().at(14);
+
+    JsonSerializer jsonSer;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonSer.readFile().toUtf8());
+    QJsonObject jsonObj = jsonDoc.object();
+
+
+    if((command & 0b10000000) == 128){
+        jsonObj.find("ipAddress").value() = QString(datagram.data().mid(15,4));
+        jsonObj.find("subnetMask").value() = QString(datagram.data().mid(19,4));
+        jsonObj.find("primary").value() = QString(datagram.data().at(24));
+    }
+    if((command & 0b01000000) == 64){
+        qInfo() << "DHCP not avilable";
+    }
+    if((command & 0b00100000) == 32){
+        qInfo() << "Not used";
+    }
+    if((command & 0b00010000) == 16){
+        qInfo() << "Default gateway not used";
+    }
+    if((command & 0b00001000) == 8){
+        Config defaultConfig;
+        jsonObj.find("shortName").value()=defaultConfig.shortName;
+        jsonObj.find("ipAddress").value()=defaultConfig.ip;
+        jsonObj.find("subnetMask").value()=defaultConfig.subnetMask;
+        jsonObj.find("net").value()=defaultConfig.net;
+        jsonObj.find("primary").value()=defaultConfig.subNetUni;
+        jsonObj.find("device").value()=defaultConfig.device;
+    }
+    if((command & 0b00000100) == 4){
+        jsonObj.find("ipAddress").value() = QString(datagram.data().mid(15,4));
+    }
+    if((command & 0b00000010) == 2){
+        jsonObj.find("subnetMask").value() = QString(datagram.data().mid(19,4));
+    }
+    if((command & 0b00000001) == 1){
+        jsonObj.find("primary").value() = QString(datagram.data().at(24));
+    }
+
+    jsonDoc.setObject(jsonObj);
+    jsonSer.writeToFile(jsonDoc.toJson());
+    ArtIpProgReplyPacket packet = constructIpProgReply();
+    QByteArray bytePacket = QByteArray::fromRawData(reinterpret_cast<const char *>(&packet),
+                                                    sizeof(packet));
+    qInfo() << "emit sendDatagram";
+    emit sendDatagram(datagram.makeReply(bytePacket));
+}

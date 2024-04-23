@@ -8,6 +8,7 @@
 #include <QtNetwork>
 
 #include "ArtPollReplyPacket.h"
+#include "ArtIpProgReplyPacket.h"
 #include "Config.h"
 #include "definitions.h"
 #include "jsonserializer.h"
@@ -23,11 +24,13 @@ public slots:
     void artPollReply(QNetworkDatagram datagram);
     void artDMX(QNetworkDatagram datagram);
     void artAddress(QNetworkDatagram datagram);
+    void artIpProg(QNetworkDatagram datagram);
     void outputDmx();
     void getConfig();
 
 private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
+    ArtIpProgReplyPacket constructIpProgReply();
     void changeIpNetmask(QString ip, QString netmask);
     void configSerialPort(QSerialPort *serialPort);
 
