@@ -10,6 +10,7 @@
 #include "ArtPollReplyPacket.h"
 #include "Config.h"
 #include "definitions.h"
+#include "jsonserializer.h"
 class ArtNetController : public QObject
 {
     Q_OBJECT
@@ -23,10 +24,11 @@ public slots:
     void artDMX(QNetworkDatagram datagram);
     void artAddress(QNetworkDatagram datagram);
     void outputDmx();
+    void getConfig();
 
 private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
-    Config getConfig();
+    void changeIpNetmask(QString ip, QString netmask);
     void configSerialPort(QSerialPort *serialPort);
 
     QSerialPort *serialPort;
@@ -35,6 +37,7 @@ private:
 
 signals:
     void sendDatagram(QNetworkDatagram datagram);
+    void newIpSet();
 };
 
 #endif // ARTNETCONTROLLER_H

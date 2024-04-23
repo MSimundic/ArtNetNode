@@ -15,6 +15,9 @@ private:
 
 signals:
     void fileReceived(QByteArray data);
+
+public slots:
+    //void fileRead(QByteArray data);
 };
 
 #endif // HTTPSERVER_H

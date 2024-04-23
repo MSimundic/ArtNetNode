@@ -14,3 +14,9 @@ void Sender::sendDatagram(QNetworkDatagram datagram)
     udpSocketv4.writeDatagram(datagram);
     qInfo("sent\n\n");
 }
+
+void Sender::bindNewIp(){
+    udpSocketv4.close();
+    udpSocketv4.bind(QHostAddress(QHostAddress::AnyIPv4), 0);
+    qInfo() << "Sender bind";
+}

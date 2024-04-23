@@ -18,6 +18,9 @@ private slots:
 private:
     QUdpSocket udpSocketv4;
 
+public slots:
+    void bindNewIp();
+
 signals:
     void readDone(QNetworkDatagram datagram);
 };

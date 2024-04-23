@@ -20,3 +20,9 @@ void Receiver::processPendingDatagrams()
         emit readDone(datagram);
     }
 }
+
+void Receiver::bindNewIp(){
+    udpSocketv4.close();
+    udpSocketv4.bind(QHostAddress::AnyIPv4, 6454, QUdpSocket::ShareAddress);
+    qInfo() << "receiver bind";
+}

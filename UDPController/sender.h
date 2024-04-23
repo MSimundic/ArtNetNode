@@ -15,6 +15,7 @@ public:
 
 public slots:
     void sendDatagram(QNetworkDatagram datagram);
+    void bindNewIp();
 
 private:
     QUdpSocket udpSocketv4;

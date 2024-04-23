@@ -5,27 +5,51 @@ ArtNetController::ArtNetController()
     serialPort = new QSerialPort;
     configSerialPort(serialPort);
     if (!serialPort->open(QIODevice::WriteOnly))
-        qCritical() << "Error: serial port failed to open. " << serialPort->error();
+        qCritical() << serialPort->error();
     data.fill(0x00, 512);
     //() << "Data length: " << data.length();
-    config = getConfig();
+    getConfig();
 }
 ArtNetController::~ArtNetController()
 {
     serialPort->close();
     delete serialPort;
 }
-Config ArtNetController::getConfig()
+void ArtNetController::getConfig()
 {
-    Config config;
+    JsonSerializer jsonSer;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonSer.readFile().toUtf8());
+    QJsonObject jsonObj = jsonDoc.object();
+    config.shortName=jsonObj.find("shortName").value().toString();
+    config.ip=jsonObj.find("ipAddress").value().toString();
+    config.subnetMask=jsonObj.find("subnetMask").value().toString();
+    config.net=static_cast<uint8_t>(jsonObj.find("net").value().toInt());
+    config.subNetUni=static_cast<uint8_t>(jsonObj.find("primary").value().toInt());
+    config.device=jsonObj.find("device").value().toString();
 
-    return config;
+    changeIpNetmask(config.ip, config.subnetMask);
+
+}
+
+void ArtNetController::changeIpNetmask(QString ip, QString netmask){
+    QProcess process;
+    QString command("echo msimundic | sudo -S ifconfig enp1s0 %1 netmask %2");
+    command = command.arg(config.ip).arg(config.subnetMask);
+    qInfo() << "command: "<<command;
+
+    process.startCommand("sh");
+    process.write(command.toLocal8Bit().data());
+    process.closeWriteChannel();
+    process.waitForFinished();
+    process.terminate();
+
+    emit newIpSet();
 }
 
 void ArtNetController::configSerialPort(QSerialPort *serialPort)
 {
     //QSerialPort serialPort;
-    serialPort->setPortName("COM10");
+    serialPort->setPortName(config.device);
     serialPort->setBaudRate(256000);
     serialPort->setDataBits(QSerialPort::Data8);
     serialPort->setParity(QSerialPort::NoParity);
@@ -64,14 +88,14 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     packet.oem_l = (config.oem >> 8) & 0xFF;
     packet.ubea_ver = 0; // UBEA not programmed
     packet.status_1 = config.status1;
-    packet.esta_man_l = (config.esta_man >> 8) & 0xFF;
-    packet.esta_man_h = (config.esta_man >> 8) & 0xFF;
+    packet.esta_man_l = (config.estaMan >> 8) & 0xFF;
+    packet.esta_man_h = (config.estaMan >> 8) & 0xFF;
 
-    memcpy(packet.short_name, config.short_name.toStdString().c_str(), config.short_name.length());
-    memcpy(packet.long_name, config.long_name.toStdString().c_str(), config.long_name.length());
+    memcpy(packet.short_name, config.shortName.toStdString().c_str(), config.shortName.length());
+    memcpy(packet.long_name, config.longName.toStdString().c_str(), config.longName.length());
     memcpy(packet.node_report,
-           config.node_report.toStdString().c_str(),
-           config.node_report.length());
+           config.nodeReport.toStdString().c_str(),
+           config.nodeReport.length());
 
     packet.num_ports_h = 0;
     packet.num_ports_l = 1;

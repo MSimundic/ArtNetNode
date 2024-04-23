@@ -6,7 +6,9 @@ HttpServer::HttpServer() {
         //return QHttpServerResponse::fromFile("./files/index.html");
         //return QHttpServerResponse::fromFile("./files/style.css");
         //return QHttpServerResponse::fromFile("./files/script.js");
-        return QHttpServerResponse::fromFile("../ArtNetNode//indexInline.html");
+        return QHttpServerResponse::fromFile("../ArtNetNode/indexInline.html");
+        //return QHttpServerResponse::fromFile;
+
     });
 
     httpServer.route("/data.json", QHttpServerRequest::Method::Post, [this](const QHttpServerRequest &request){
