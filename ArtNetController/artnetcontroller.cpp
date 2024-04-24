@@ -196,7 +196,41 @@ void ArtNetController::artDMX(QNetworkDatagram datagram)
 }
 
 void ArtNetController::artAddress(QNetworkDatagram datagram) {
+    uint8_t command = datagram.data().at(106);
 
+    JsonSerializer jsonSer;
+    QJsonDocument jsonDoc = jsonSer.readJsonFile("./configuration.json");
+    QJsonObject jsonObj = jsonDoc.object();
+    QByteArray data = datagram.data();
+
+    QString longName(data.mid(32,64));
+    QString shortName(data.mid(14,18));
+    if(longName.at(0)!=0x0000){
+        jsonObj.find("longName").value()=longName;
+    }
+    if(shortName.at(0)!=0x0000){
+        jsonObj.find("shortName").value()=shortName;
+    }
+
+    if((data.at(12) & 0b10000000) == 128){
+        jsonObj.find("net").value() = data.at(12) & 0b01111111;
+    }
+
+    // QString subNetUni(jsonObj.find("primary").value());
+
+    // if((data.at(96) & 0b10000000) == 128){
+    //     subNetUni =
+    // }
+
+
+    jsonDoc.setObject(jsonObj);
+    jsonSer.writeToFile(jsonDoc.toJson(),"./configuration.json");
+    getConfig();
+    ArtPollReplyPacket packet = constructArtPollReply(datagram);
+    QByteArray bytePacket = QByteArray::fromRawData(reinterpret_cast<const char *>(&packet),
+                                                    sizeof(packet));
+    qInfo() << "emit sendDatagram";
+    emit sendDatagram(datagram.makeReply(bytePacket));
 }
 
 QString ArtNetController::buildIpAddress(QByteArray bytesIp){
@@ -244,7 +278,7 @@ void ArtNetController::artIpProg(QNetworkDatagram datagram) {
         jsonObj.find("ipAddress").value()=defaultConfig.ip;
         jsonObj.find("subnetMask").value()=defaultConfig.subnetMask;
         //jsonObj.find("net").value()=defaultConfig.net;
-        jsonObj.find("primary").value()=defaultConfig.subNetUni;
+        //jsonObj.find("primary").value()=defaultConfig.subNetUni;
         //jsonObj.find("device").value()=defaultConfig.device;
         qInfo() << "default change";
     }
@@ -257,8 +291,7 @@ void ArtNetController::artIpProg(QNetworkDatagram datagram) {
         qInfo() << "sm change";
     }
     if((command & 0b00000001) == 1 & enableProgramming){
-        jsonObj.find("primary").value() = QString(datagram.data().at(25));
-        qInfo() << "primary change";
+        qInfo() << "Cant change default port";
     }
 
     jsonDoc.setObject(jsonObj);
