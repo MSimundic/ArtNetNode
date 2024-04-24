@@ -263,7 +263,7 @@ void ArtNetController::artIpProg(QNetworkDatagram datagram) {
 
     jsonDoc.setObject(jsonObj);
     jsonSer.writeToFile(jsonDoc.toJson(),"./configuration.json");
-
+    getConfig();
     ArtIpProgReplyPacket packet = constructIpProgReply();
     QByteArray bytePacket = QByteArray::fromRawData(reinterpret_cast<const char *>(&packet),
                                                     sizeof(packet));
