@@ -17,10 +17,12 @@ ArtNetController::~ArtNetController()
 }
 void ArtNetController::getConfig()
 {
+    qInfo() << "ArtnetCon get config";
     JsonSerializer jsonSer;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonSer.readFile().toUtf8());
+    QJsonDocument jsonDoc = jsonSer.readJsonFile("./configuration.json");
     QJsonObject jsonObj = jsonDoc.object();
     config.shortName=jsonObj.find("shortName").value().toString();
+    config.longName=jsonObj.find("longName").value().toString();
     config.ip=jsonObj.find("ipAddress").value().toString();
     config.subnetMask=jsonObj.find("subnetMask").value().toString();
     config.net=static_cast<uint8_t>(jsonObj.find("net").value().toInt());
@@ -32,6 +34,7 @@ void ArtNetController::getConfig()
 }
 
 void ArtNetController::changeIpNetmask(QString ip, QString netmask){
+    qInfo() << "ChangeIpNetMask";
     QProcess process;
     QString command("echo msimundic | sudo -S ifconfig enp1s0 %1 netmask %2");
     command = command.arg(config.ip).arg(config.subnetMask);
@@ -196,49 +199,71 @@ void ArtNetController::artAddress(QNetworkDatagram datagram) {
 
 }
 
+QString ArtNetController::buildIpAddress(QByteArray bytesIp){
+    QString ipAddress;
+    //QString octet(reinterpret_cast<int>(bytesIp.at(0)));
+    ipAddress =
+        QString::number(static_cast<uint8_t>(bytesIp.at(0))) + QString(".") +
+        QString::number(static_cast<uint8_t>(bytesIp.at(1))) + QString(".") +
+        QString::number(static_cast<uint8_t>(bytesIp.at(2))) + QString(".") +
+        QString::number(static_cast<uint8_t>(bytesIp.at(3)));
+
+
+
+    return ipAddress;
+}
+
 void ArtNetController::artIpProg(QNetworkDatagram datagram) {
     uint8_t command = datagram.data().at(14);
 
     JsonSerializer jsonSer;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonSer.readFile().toUtf8());
+    QJsonDocument jsonDoc = jsonSer.readJsonFile("./configuration.json");
     QJsonObject jsonObj = jsonDoc.object();
-
-
+    QByteArray data = datagram.data();
+    bool enableProgramming = false;
     if((command & 0b10000000) == 128){
-        jsonObj.find("ipAddress").value() = QString(datagram.data().mid(15,4));
-        jsonObj.find("subnetMask").value() = QString(datagram.data().mid(19,4));
-        jsonObj.find("primary").value() = QString(datagram.data().at(24));
+        // jsonObj.find("ipAddress").value() = QString(datagram.data().mid(16,4));
+        // jsonObj.find("subnetMask").value() = QString(datagram.data().mid(20,4));
+        // jsonObj.find("primary").value() = QString(datagram.data().at(25));
+        enableProgramming = true;
+        qInfo() << "enable prog";
     }
-    if((command & 0b01000000) == 64){
+    if((command & 0b01000000) == 64 & enableProgramming){
         qInfo() << "DHCP not avilable";
     }
-    if((command & 0b00100000) == 32){
+    if((command & 0b00100000) == 32 & enableProgramming){
         qInfo() << "Not used";
     }
-    if((command & 0b00010000) == 16){
+    if((command & 0b00010000) == 16 & enableProgramming){
         qInfo() << "Default gateway not used";
     }
-    if((command & 0b00001000) == 8){
+    if((command & 0b00001000) == 8 & enableProgramming){
         Config defaultConfig;
-        jsonObj.find("shortName").value()=defaultConfig.shortName;
+        //jsonObj.find("longName").value()=defaultConfig.longName;
+        //jsonObj.find("shortName").value()=defaultConfig.shortName;
         jsonObj.find("ipAddress").value()=defaultConfig.ip;
         jsonObj.find("subnetMask").value()=defaultConfig.subnetMask;
-        jsonObj.find("net").value()=defaultConfig.net;
+        //jsonObj.find("net").value()=defaultConfig.net;
         jsonObj.find("primary").value()=defaultConfig.subNetUni;
-        jsonObj.find("device").value()=defaultConfig.device;
+        //jsonObj.find("device").value()=defaultConfig.device;
+        qInfo() << "default change";
     }
-    if((command & 0b00000100) == 4){
-        jsonObj.find("ipAddress").value() = QString(datagram.data().mid(15,4));
+    if((command & 0b00000100) == 4 & enableProgramming){
+        jsonObj.find("ipAddress").value() = buildIpAddress(datagram.data().mid(16,4));
+        qInfo() << "IP change";
     }
-    if((command & 0b00000010) == 2){
-        jsonObj.find("subnetMask").value() = QString(datagram.data().mid(19,4));
+    if((command & 0b00000010) == 2 & enableProgramming){
+        jsonObj.find("subnetMask").value() = buildIpAddress(datagram.data().mid(20,4));
+        qInfo() << "sm change";
     }
-    if((command & 0b00000001) == 1){
-        jsonObj.find("primary").value() = QString(datagram.data().at(24));
+    if((command & 0b00000001) == 1 & enableProgramming){
+        jsonObj.find("primary").value() = QString(datagram.data().at(25));
+        qInfo() << "primary change";
     }
 
     jsonDoc.setObject(jsonObj);
-    jsonSer.writeToFile(jsonDoc.toJson());
+    jsonSer.writeToFile(jsonDoc.toJson(),"./configuration.json");
+
     ArtIpProgReplyPacket packet = constructIpProgReply();
     QByteArray bytePacket = QByteArray::fromRawData(reinterpret_cast<const char *>(&packet),
                                                     sizeof(packet));

@@ -10,10 +10,10 @@ class JsonSerializer : public QObject
     Q_OBJECT
 public:
     JsonSerializer();
-    QString readFile();
+    QJsonDocument readJsonFile(QString path);
 
 public slots:
-    void writeToFile(QByteArray data);
+    void writeToFile(QByteArray data, QString path);
 
 
 signals:

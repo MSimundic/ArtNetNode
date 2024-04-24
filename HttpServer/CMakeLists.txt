@@ -8,4 +8,5 @@ target_link_libraries(httpServer PRIVATE
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::HttpServer
     definitions
+    jsonserializer
 )

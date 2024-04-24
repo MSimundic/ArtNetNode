@@ -3,6 +3,9 @@
 
 #include <QHttpServer>
 #include <QHttpServerResponse>
+#include <QFile>
+
+#include "jsonserializer.h"
 
 class HttpServer : public QObject
 {
@@ -14,7 +17,7 @@ private:
     QByteArray data;
 
 signals:
-    void fileReceived(QByteArray data);
+    void fileReceived(QByteArray data, QString path);
 
 public slots:
     void listenNewIp();

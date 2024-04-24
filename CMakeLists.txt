@@ -21,10 +21,11 @@ add_executable(ArtNetNode
 
 add_subdirectory(UDPController)
 add_subdirectory(ArtNetController)
+add_subdirectory(HttpServer)
 add_subdirectory(Decoder)
 add_subdirectory(Definitions)
 add_subdirectory(JsonSerializer)
-add_subdirectory(HttpServer)
+
 
 target_link_libraries(ArtNetNode PRIVATE
     Qt${QT_VERSION_MAJOR}::Core

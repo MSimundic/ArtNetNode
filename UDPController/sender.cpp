@@ -8,11 +8,11 @@ Sender::Sender()
 
 void Sender::sendDatagram(QNetworkDatagram datagram)
 {
-    qInfo("try send");
+    //qInfo("try send");
     qInfo() << datagram.destinationAddress();
     //consoleAddress4.setAddress(QString(ipAddress));
     udpSocketv4.writeDatagram(datagram);
-    qInfo("sent\n\n");
+    qInfo("\n\n");
 }
 
 void Sender::bindNewIp(){

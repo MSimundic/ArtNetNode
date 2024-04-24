@@ -6,14 +6,38 @@ HttpServer::HttpServer() {
         //return QHttpServerResponse::fromFile("./files/index.html");
         //return QHttpServerResponse::fromFile("./files/style.css");
         //return QHttpServerResponse::fromFile("./files/script.js");
-        return QHttpServerResponse::fromFile("../ArtNetNode/indexInline.html");
+        JsonSerializer jsonSer;
+        QJsonObject jsonObj = jsonSer.readJsonFile("./configuration.json").object();
+
+        QFile htmlFile("../ArtNetNode/indexInline.html");
+        if(!htmlFile.open(QIODevice::ReadWrite)) {
+            qInfo() << htmlFile.errorString();
+        }
+        QString textHtmlFile(htmlFile.readAll());
+        htmlFile.close();
+        textHtmlFile.replace("@shortName@", jsonObj.value("shortName").toString());
+        textHtmlFile.replace("@longName@", jsonObj.value("longName").toString());
+        textHtmlFile.replace("@ipAddress@", jsonObj.value("ipAddress").toString());
+        textHtmlFile.replace("@subnetMask@", jsonObj.value("subnetMask").toString());
+        textHtmlFile.replace("@net@", jsonObj.value("net").toString());
+        textHtmlFile.replace("@primary@", jsonObj.value("primary").toString());
+        textHtmlFile.replace("@ipAddress@", jsonObj.value("ipAddress").toString());
+
+        QFile htmlFileToSend("../ArtNetNode/indexInlineToSend.html");
+        if(!htmlFileToSend.open(QIODevice::WriteOnly)) {
+            qInfo() << htmlFileToSend.errorString();
+        }
+        htmlFileToSend.seek(0);
+        htmlFileToSend.write(textHtmlFile.toUtf8());
+        htmlFileToSend.close();
+        return QHttpServerResponse::fromFile("../ArtNetNode/indexInlineToSend.html");
         //return QHttpServerResponse::fromFile;
 
     });
 
     httpServer.route("/data.json", QHttpServerRequest::Method::Post, [this](const QHttpServerRequest &request){
         qInfo()<< "Post request received";
-        emit fileReceived(request.body());
+        emit fileReceived(request.body(), "./configuration.json");
         return QHttpServerResponse(QHttpServerResponder::StatusCode::Ok);
     });
 

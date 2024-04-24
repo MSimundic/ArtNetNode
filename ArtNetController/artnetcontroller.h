@@ -33,7 +33,7 @@ private:
     ArtIpProgReplyPacket constructIpProgReply();
     void changeIpNetmask(QString ip, QString netmask);
     void configSerialPort(QSerialPort *serialPort);
-
+    QString buildIpAddress(QByteArray bytesIp);
     QSerialPort *serialPort;
     QByteArray data;
     Config config;
