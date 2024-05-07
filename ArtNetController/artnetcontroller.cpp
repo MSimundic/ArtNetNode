@@ -2,18 +2,26 @@
 
 ArtNetController::ArtNetController()
 {
-    serialPort = new QSerialPort;
-    configSerialPort(serialPort);
-    if (!serialPort->open(QIODevice::WriteOnly))
-        qCritical() << serialPort->error();
+    serialPort1 = new QSerialPort;
+    serialPort2 = new QSerialPort;
+    configSerialPort(serialPort1, "/dev/ttyUSB0");
+    configSerialPort(serialPort2, "/dev/ttyUSB1");
+    //configSerialPort(serialPort1, "COM10");
+    //configSerialPort(serialPort2, "COM12");
+    if (!serialPort1->open(QIODevice::WriteOnly))
+        qCritical() << serialPort1->error();
+    if (!serialPort2->open(QIODevice::WriteOnly))
+        qCritical() << serialPort1->error();
     data.fill(0x00, 512);
     //() << "Data length: " << data.length();
     getConfig();
 }
 ArtNetController::~ArtNetController()
 {
-    serialPort->close();
-    delete serialPort;
+    serialPort1->close();
+    delete serialPort1;
+    serialPort2->close();
+    delete serialPort2;
 }
 void ArtNetController::getConfig()
 {
@@ -26,11 +34,11 @@ void ArtNetController::getConfig()
     config.ip=jsonObj.find("ipAddress").value().toString();
     config.subnetMask=jsonObj.find("subnetMask").value().toString();
     config.net=static_cast<uint8_t>(jsonObj.find("net").value().toInt());
-    config.subNetUni=static_cast<uint8_t>(jsonObj.find("primary").value().toInt());
-    config.device=jsonObj.find("device").value().toString();
-
+    //uint8_t test = static_cast<uint8_t>(jsonObj.find("subnet").value().toString().toInt());
+    config.subNet = static_cast<uint8_t>(jsonObj.find("subnet").value().toString().toInt());
+    config.uni1 = static_cast<uint8_t>(jsonObj.find("uni1").value().toString().toInt());
+    config.uni2 = static_cast<uint8_t>(jsonObj.find("uni2").value().toString().toInt());
     changeIpNetmask(config.ip, config.subnetMask);
-
 }
 
 void ArtNetController::changeIpNetmask(QString ip, QString netmask){
@@ -38,7 +46,7 @@ void ArtNetController::changeIpNetmask(QString ip, QString netmask){
     QProcess process;
     QString command("echo msimundic | sudo -S ifconfig enp1s0 %1 netmask %2");
     command = command.arg(config.ip).arg(config.subnetMask);
-    qInfo() << "command: "<<command;
+    qInfo() << "command: " << command;
 
     process.startCommand("sh");
     process.write(command.toLocal8Bit().data());
@@ -49,10 +57,10 @@ void ArtNetController::changeIpNetmask(QString ip, QString netmask){
     emit newIpSet();
 }
 
-void ArtNetController::configSerialPort(QSerialPort *serialPort)
+void ArtNetController::configSerialPort(QSerialPort *serialPort, QString portName)
 {
     //QSerialPort serialPort;
-    serialPort->setPortName(config.device);
+    serialPort->setPortName(portName);
     serialPort->setBaudRate(256000);
     serialPort->setDataBits(QSerialPort::Data8);
     serialPort->setParity(QSerialPort::NoParity);
@@ -101,7 +109,7 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
            config.nodeReport.length());
 
     packet.num_ports_h = 0;
-    packet.num_ports_l = 1;
+    packet.num_ports_l = 2;
 
     memset(packet.port_types, 0, 4);
     memset(packet.good_input, 0, 4);
@@ -110,10 +118,13 @@ ArtPollReplyPacket ArtNetController::constructArtPollReply(QNetworkDatagram data
     memset(packet.sw_out, 0, 4);
 
     packet.net_sw = (config.net) & 0x7F;
-    packet.sub_sw = (config.subNetUni >> 4) & 0x0F;
-    packet.sw_in[0] = (config.subNetUni >> 0) & 0x0F;
-    packet.sw_out[0] = 0;
-    packet.port_types[0] = 0xC0;
+    packet.sub_sw = (config.subNet >> 4) & 0x0F;
+    packet.sw_in[0] = (config.uni1 >> 0) & 0x0F;
+    packet.sw_in[1] = (config.uni2 >> 0) & 0x0F;
+    packet.sw_out[0] = (config.uni1 >> 0) & 0x0F;
+    packet.sw_out[1] = (config.uni2 >> 0) & 0x0F;
+    packet.port_types[0] = 0x80;
+    packet.port_types[1] = 0x80;
     packet.good_input[0] = 0x80;
     packet.good_output[0] = 0x80;
     packet.sw_video = 0;
@@ -158,7 +169,7 @@ ArtIpProgReplyPacket ArtNetController::constructIpProgReply(){
     return packet;
 }
 
-void ArtNetController::outputDmx()
+void ArtNetController::outputDmx(QSerialPort *serialPort)
 {
     serialPort->setBreakEnabled(true);
     //QThread::msleep(1);
@@ -186,12 +197,28 @@ void ArtNetController::artPollReply(QNetworkDatagram datagram) {}
 
 void ArtNetController::artDMX(QNetworkDatagram datagram)
 {
-    qInfo() << "Config uni: " << config.net << "Config subnetUni " << config.subNetUni;
-    qInfo() << "Packet uni: " << datagram.data().at(15) << "Packet subnetUni "
-            << datagram.data().at(14);
-    if (datagram.data().at(15) == config.net && datagram.data().at(14) == config.subNetUni) {
+    //qInfo() << "Config uni: " << config.net << "Config subnet " << config.subNet;
+    //qInfo() << "Packet uni: " << datagram.data().at(15) << "Packet subnetUni "
+    //        << datagram.data().at(14);
+    uint8_t subNetUni1, subNetUni2;
+
+    uint8_t uni1 = (config.uni1 & 0x0F);
+    uint8_t uni2 = (config.uni2 & 0x0F);
+    // uint8_t subNet1 = (config.subNet << 4);
+    // uint8_t subNet2 = (config.subNet << 4);
+
+    subNetUni2 = (config.subNet << 4) | (config.uni1 & 0x0F);
+    subNetUni1 = (config.subNet << 4) | (config.uni2 & 0x0F);
+
+    if (datagram.data().at(15) == config.net && datagram.data().at(14) == subNetUni1) {
+        qInfo() << "SubnetUni:" << subNetUni1;
         data = datagram.data().mid(18, 512);
-        outputDmx();
+        outputDmx(serialPort1);
+    }
+    if (datagram.data().at(15) == config.net && datagram.data().at(14) == subNetUni2) {
+        qInfo() << "SubnetUni:" << subNetUni2;
+        data = datagram.data().mid(18, 512);
+        outputDmx(serialPort2);
     }
 }
 
@@ -262,16 +289,16 @@ void ArtNetController::artIpProg(QNetworkDatagram datagram) {
         enableProgramming = true;
         qInfo() << "enable prog";
     }
-    if((command & 0b01000000) == 64 & enableProgramming){
+    if ((command & 0b01000000) == (64 & enableProgramming)) {
         qInfo() << "DHCP not avilable";
     }
-    if((command & 0b00100000) == 32 & enableProgramming){
+    if ((command & 0b00100000) == (32 & enableProgramming)) {
         qInfo() << "Not used";
     }
-    if((command & 0b00010000) == 16 & enableProgramming){
+    if ((command & 0b00010000) == (16 & enableProgramming)) {
         qInfo() << "Default gateway not used";
     }
-    if((command & 0b00001000) == 8 & enableProgramming){
+    if ((command & 0b00001000) == (8 & enableProgramming)) {
         Config defaultConfig;
         //jsonObj.find("longName").value()=defaultConfig.longName;
         //jsonObj.find("shortName").value()=defaultConfig.shortName;
@@ -282,15 +309,15 @@ void ArtNetController::artIpProg(QNetworkDatagram datagram) {
         //jsonObj.find("device").value()=defaultConfig.device;
         qInfo() << "default change";
     }
-    if((command & 0b00000100) == 4 & enableProgramming){
+    if ((command & 0b00000100) == (4 & enableProgramming)) {
         jsonObj.find("ipAddress").value() = buildIpAddress(datagram.data().mid(16,4));
         qInfo() << "IP change";
     }
-    if((command & 0b00000010) == 2 & enableProgramming){
+    if ((command & 0b00000010) == (2 & enableProgramming)) {
         jsonObj.find("subnetMask").value() = buildIpAddress(datagram.data().mid(20,4));
         qInfo() << "sm change";
     }
-    if((command & 0b00000001) == 1 & enableProgramming){
+    if ((command & 0b00000001) == (1 & enableProgramming)) {
         qInfo() << "Cant change default port";
     }
 

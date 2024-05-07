@@ -25,16 +25,17 @@ public slots:
     void artDMX(QNetworkDatagram datagram);
     void artAddress(QNetworkDatagram datagram);
     void artIpProg(QNetworkDatagram datagram);
-    void outputDmx();
+    void outputDmx(QSerialPort *serialPort);
     void getConfig();
 
 private:
     ArtPollReplyPacket constructArtPollReply(QNetworkDatagram datagram);
     ArtIpProgReplyPacket constructIpProgReply();
     void changeIpNetmask(QString ip, QString netmask);
-    void configSerialPort(QSerialPort *serialPort);
+    void configSerialPort(QSerialPort *serialPort, QString portName);
     QString buildIpAddress(QByteArray bytesIp);
-    QSerialPort *serialPort;
+    QSerialPort *serialPort1;
+    QSerialPort *serialPort2;
     QByteArray data;
     Config config;
 
