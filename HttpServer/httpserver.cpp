@@ -20,6 +20,9 @@ HttpServer::HttpServer() {
         textHtmlFile.replace("@ipAddress@", jsonObj.value("ipAddress").toString());
         textHtmlFile.replace("@subnetMask@", jsonObj.value("subnetMask").toString());
         textHtmlFile.replace("@net@", jsonObj.value("net").toString());
+        textHtmlFile.replace("@subnet@", jsonObj.value("subnet").toString());
+        textHtmlFile.replace("@uni1@", jsonObj.value("uni1").toString());
+        textHtmlFile.replace("@uni2@", jsonObj.value("uni2").toString());
         textHtmlFile.replace("@primary@", jsonObj.value("primary").toString());
         textHtmlFile.replace("@ipAddress@", jsonObj.value("ipAddress").toString());
 
