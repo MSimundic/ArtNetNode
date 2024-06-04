@@ -6,7 +6,7 @@ void Decoder::decodeDatagram(QNetworkDatagram datagram)
     //qInfo("try decode datagram");
 
     OpCode opCode = getOpCode(datagram);
-    qInfo() << "OpCode: " << QString("0x%1").arg(static_cast<int>(opCode), 4, 16, QLatin1Char('0'));
+    //qInfo() << "OpCode: " << QString("0x%1").arg(static_cast<int>(opCode), 4, 16, QLatin1Char('0'));
     switch (opCode) {
     case OpCode::Poll:
         qInfo() << "ArtPoll";

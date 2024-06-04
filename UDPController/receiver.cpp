@@ -16,7 +16,7 @@ void Receiver::processPendingDatagrams()
     //qInfo("process");
     while (udpSocketv4.hasPendingDatagrams()) {
         QNetworkDatagram datagram = udpSocketv4.receiveDatagram();
-        qInfo("received");
+        //qInfo("received");
         emit readDone(datagram);
     }
 }
