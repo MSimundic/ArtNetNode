@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
     QObject::connect(&decoder, &Decoder::artIpProg, &artNetController, &ArtNetController::artIpProg);
     QObject::connect(&decoder, &Decoder::artAddress, &artNetController, &ArtNetController::artAddress);
 
-    QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx);
+    QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx1);
+    QObject::connect(timer, &QTimer::timeout, &artNetController, &ArtNetController::outputDmx2);
     timer->start(250);
 
     return a.exec();

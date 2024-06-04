@@ -12,7 +12,8 @@ ArtNetController::ArtNetController()
         qCritical() << serialPort1->error();
     if (!serialPort2->open(QIODevice::WriteOnly))
         qCritical() << serialPort1->error();
-    data.fill(0x00, 512);
+    data1.fill(0x00, 512);
+    data2.fill(0x00, 512);
     //() << "Data length: " << data.length();
     getConfig();
 }
@@ -169,18 +170,32 @@ ArtIpProgReplyPacket ArtNetController::constructIpProgReply(){
     return packet;
 }
 
-void ArtNetController::outputDmx(QSerialPort *serialPort)
+void ArtNetController::outputDmx1()
 {
-    serialPort->setBreakEnabled(true);
+    serialPort1->setBreakEnabled(true);
     //QThread::msleep(1);
-    serialPort->setBreakEnabled(false);
-    QByteArray dataToSend = data;
-    dataToSend.prepend(QByteArray::fromHex("00"));
-    int count = serialPort->write(dataToSend);
+    serialPort1->setBreakEnabled(false);
+    QByteArray dataToSend1 = data1;
+    dataToSend1.prepend(QByteArray::fromHex("00"));
+    int count = serialPort1->write(dataToSend1);
 
     qInfo() << "Number of bytes sent" << count;
 
-    serialPort->waitForBytesWritten(-1);
+    serialPort1->waitForBytesWritten(-1);
+}
+
+void ArtNetController::outputDmx2()
+{
+    serialPort2->setBreakEnabled(true);
+    //QThread::msleep(1);
+    serialPort2->setBreakEnabled(false);
+    QByteArray dataToSend2 = data2;
+    dataToSend2.prepend(QByteArray::fromHex("00"));
+    int count = serialPort2->write(dataToSend2);
+
+    qInfo() << "Number of bytes sent" << count;
+
+    serialPort2->waitForBytesWritten(-1);
 }
 
 void ArtNetController::artPoll(QNetworkDatagram datagram)
@@ -202,8 +217,8 @@ void ArtNetController::artDMX(QNetworkDatagram datagram)
     //        << datagram.data().at(14);
     uint8_t subNetUni1, subNetUni2;
 
-    uint8_t uni1 = (config.uni1 & 0x0F);
-    uint8_t uni2 = (config.uni2 & 0x0F);
+    //uint8_t uni1 = (config.uni1 & 0x0F);
+    //uint8_t uni2 = (config.uni2 & 0x0F);
     // uint8_t subNet1 = (config.subNet << 4);
     // uint8_t subNet2 = (config.subNet << 4);
 
@@ -212,13 +227,13 @@ void ArtNetController::artDMX(QNetworkDatagram datagram)
 
     if (datagram.data().at(15) == config.net && datagram.data().at(14) == subNetUni1) {
         qInfo() << "SubnetUni:" << subNetUni1;
-        data = datagram.data().mid(18, 512);
-        outputDmx(serialPort1);
+        data1 = datagram.data().mid(18, 512);
+        outputDmx1();
     }
     if (datagram.data().at(15) == config.net && datagram.data().at(14) == subNetUni2) {
         qInfo() << "SubnetUni:" << subNetUni2;
-        data = datagram.data().mid(18, 512);
-        outputDmx(serialPort2);
+        data2 = datagram.data().mid(18, 512);
+        outputDmx2();
     }
 }
 

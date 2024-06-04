@@ -25,7 +25,8 @@ public slots:
     void artDMX(QNetworkDatagram datagram);
     void artAddress(QNetworkDatagram datagram);
     void artIpProg(QNetworkDatagram datagram);
-    void outputDmx(QSerialPort *serialPort);
+    void outputDmx1();
+    void outputDmx2();
     void getConfig();
 
 private:
@@ -36,7 +37,8 @@ private:
     QString buildIpAddress(QByteArray bytesIp);
     QSerialPort *serialPort1;
     QSerialPort *serialPort2;
-    QByteArray data;
+    QByteArray data1;
+    QByteArray data2;
     Config config;
 
 signals:
