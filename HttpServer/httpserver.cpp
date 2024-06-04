@@ -9,7 +9,7 @@ HttpServer::HttpServer() {
         JsonSerializer jsonSer;
         QJsonObject jsonObj = jsonSer.readJsonFile("./configuration.json").object();
 
-        QFile htmlFile("../ArtNetNode/indexInline.html");
+        QFile htmlFile("./indexInline.html");
         if(!htmlFile.open(QIODevice::ReadWrite)) {
             qInfo() << htmlFile.errorString();
         }
@@ -26,14 +26,14 @@ HttpServer::HttpServer() {
         textHtmlFile.replace("@primary@", jsonObj.value("primary").toString());
         textHtmlFile.replace("@ipAddress@", jsonObj.value("ipAddress").toString());
 
-        QFile htmlFileToSend("../ArtNetNode/indexInlineToSend.html");
+        QFile htmlFileToSend("./indexInlineToSend.html");
         if(!htmlFileToSend.open(QIODevice::WriteOnly)) {
             qInfo() << htmlFileToSend.errorString();
         }
         htmlFileToSend.seek(0);
         htmlFileToSend.write(textHtmlFile.toUtf8());
         htmlFileToSend.close();
-        return QHttpServerResponse::fromFile("../ArtNetNode/indexInlineToSend.html");
+        return QHttpServerResponse::fromFile("./indexInlineToSend.html");
         //return QHttpServerResponse::fromFile;
 
     });
